@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Financiera</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .tabs button {
+            color: white;
+            background-color: #333;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .tabs button:hover {
+            background-color: #575757;
+        }
+        .tab-content {
+            display: none;
+            margin-top: 20px;
+        }
+        .active-tab {
+            display: block;
+        }
+        /* Estilo para los gráficos */
+        canvas {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        /* Estilo para formularios */
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora Financiera</h1>
+    </header>
+
+    <div class="container">
+        <!-- Pestañas -->
+        <div class="tabs">
+            <button onclick="changeTab('intereses')">Intereses</button>
+            <button onclick="changeTab('amortizaciones')">Amortizaciones</button>
+            <button onclick="changeTab('anualidades')">Anualidades</button>
+            <button onclick="changeTab('gradientes')">Gradientes</button>
+            <button onclick="changeTab('depreciacion')">Depreciación</button>
+            <button onclick="changeTab('finanzas')">Var, Tir, Payback</button>
+        </div>
+
+        <!-- Contenido de las Pestañas -->
+         
+        <!-- Intereses -->
+        <div id="intereses" class="tab-content active-tab">
+            <h2>Intereses</h2>
+            <label>Capital ($): 
+                <input type="number" id="principal" placeholder="Ejemplo: 1000" />
+            </label>
+            <label>Tasa de interés (%): 
+                <input type="number" id="tasa-interes" placeholder="Ejemplo: 5" />
+            </label>
+            <label>Tiempo: 
+                <input type="number" id="tiempo-interes" placeholder="Ejemplo: 2" />
+            </label>
+            <label>Unidad de tiempo:
+                <select id="unidad-tiempo">
+                    <option value="anual">Años</option>
+                    <option value="mensual">Meses</option>
+                    <option value="diario">Días</option>
+                </select>
+            </label>
+            <button onclick="calcularIntereses()">Calcular</button>
+            <button onclick="reiniciarIntereses()">Nueva Operación</button>
+        
+            <div id="resultado-intereses">
+                <h3>Resultados</h3>
+                <!-- Los resultados de interés simple y compuesto se inyectarán aquí -->
+            </div>
+        
+            <div class="graficos">
+                <h3>Gráficos</h3>
+                <p><strong>Gráfico de Interés Simple:</strong></p>
+                <canvas id="grafico-simple" width="400" height="200"></canvas>
+                
+                <p><strong>Gráfico de Interés Compuesto:</strong></p>
+                <canvas id="grafico-compuesto" width="400" height="200"></canvas>
+                
+                <p><strong>Gráfico Comparativo:</strong></p>
+                <canvas id="grafico-comparativo" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Amortizaciones -->
+        <div id="amortizaciones" class="tab-content">
+            <h2>Amortizaciones</h2>
+            <label>Capital ($): <input type="number" id="capital" /></label>
+            <label>Tasa de interés anual (%): <input type="number" id="tasa-amortizacion" /></label>
+            <label>Períodos: <input type="number" id="periodos-amortizacion" /></label>
+            <label>Tipo de amortización:
+                <select id="tipo-amortizacion">
+                    <option value="americano">Americano</option>
+                    <option value="frances">Francés</option>
+                    <option value="aleman">Alemán</option>
+                </select>
+            </label>
+            <button onclick="calcularAmortizaciones()">Calcular</button>
+            <div id="resultado-amortizaciones"></div>
+            <table id="tabla-amortizaciones"></table>
+            <canvas id="grafico-amortizaciones" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Sección de Anualidades -->
+        <div id="anualidades" class="tab-content">
+            <h2>Calculadora de Anualidades</h2>
+            <label for="tipo-anualidad">Tipo de Anualidad:</label>
+            <select id="tipo-anualidad">
+                <option value="vencida">Vencida</option>
+                <option value="anticipada">Anticipada</option>
+            </select>
+            <label for="calculo">¿Qué deseas calcular?</label>
+            <select id="calculo">
+                <option value="A">Anualidad (A)</option>
+                <option value="P">Valor Presente (P)</option>
+                <option value="F">Valor Futuro (F)</option>
+            </select>
+            <label for="tasa">Tasa de Interés (%)</label>
+            <input type="number" id="tasa" placeholder="Ejemplo: 5 (para 5%)">
+            <label for="periodos">Número de Períodos</label>
+            <input type="number" id="periodos" placeholder="Ejemplo: 12">
+            <label for="valor">Ingresa el Valor</label>
+            <input type="number" id="valor" placeholder="Ejemplo: 1000">
+            <button onclick="calcularAnualidades()">Calcular</button>
+            <div id="resultado-anualidades" class="result"></div>
+        </div>
+
+        <!-- Sección de Gradientes -->
+        <div id="gradientes" class="tab-content">
+            <h2>Calculadora de Gradientes</h2>
+            <label for="tipo-gradiente">Tipo de Gradiente:</label>
+            <select id="tipo-gradiente">
+                <option value="aritmetico">Aritmético</option>
+                <option value="geometrico">Geométrico Exponencial</option>
+            </select>
+            <br>
+            <label for="valor-inicial">Valor Inicial (C)</label>
+            <input type="number" id="valor-inicial" placeholder="Ejemplo: 100">
+            <br>
+            <label for="tasa-crecimiento">Tasa de Crecimiento (%)</label>
+            <input type="number" id="tasa-crecimiento" placeholder="Ejemplo: 3 (para 3%)">
+            <br>
+            <label for="tasa-interes">Tasa de Interés (%)</label>
+            <input type="number" id="tasa-interes" placeholder="Ejemplo: 5 (para 5%)">
+            <br>
+            <label for="periodos-gradiente">Número de Períodos</label>
+            <input type="number" id="periodos-gradiente" placeholder="Ejemplo: 10">
+            <br>
+            <button onclick="calcularGradientes()">Calcular</button>
+            <div id="resultado-gradientes" class="result"></div>
+            <div id="tabla-gradientes"></div>
+        </div>
+              
+
+        <!-- Sección de Depreciación -->
+        <div id="depreciacion" class="tab-content">
+            <h2>Calculadora de Depreciación</h2>
+            <label for="costo-inicial">Costo Inicial del Activo</label>
+            <input type="number" id="costo-inicial" placeholder="Ejemplo: 10000">
+            <label for="valor-residual">Valor Residual</label>
+            <input type="number" id="valor-residual" placeholder="Ejemplo: 1000">
+            <label for="vida-util">Vida Útil (años)</label>
+            <input type="number" id="vida-util" placeholder="Ejemplo: 5">
+            <button onclick="calcularDepreciacion()">Calcular Depreciación</button>
+            <div id="resultado-depreciacion" class="result"></div>
+            <div id="tabla-depreciacion"></div>
+        </div>
+
+        <!-- Sección de Finanzas -->
+<div id="finanzas" class="tab-content">
+    <h2>VNA, TIR, Payback</h2>
+
+    <h3>Ingreso de Datos</h3>
+    <label for="egreso-inicial">Egreso Inicial ($):</label>
+    <input type="number" id="egreso-inicial" placeholder="Ejemplo: 1000"><br>
+
+    <label for="cashflows">Flujos Netos (separados por comas):</label>
+    <input type="text" id="cashflows" placeholder="Ejemplo: 200, 300, 400"><br>
+
+    <label for="tasa-interes-finanzas">Tasa de Interés (%):</label>
+    <input type="number" id="tasa-interes-finanzas" placeholder="Ejemplo: 10 (para 10%)"><br>
+
+    <button onclick="calcularFinanzas()">Calcular</button>
+
+    <div id="resultado-finanzas" class="result">
+        <h3>Resultados</h3>
+        <p id="resultado-vna"></p>
+        <p id="resultado-tir"></p>
+        <p id="resultado-payback"></p>
+    </div>
+</div>
+
+<script>
+    // Funciones para manejar las pestañas
+    function changeTab(tabName) {
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => {
+            tab.classList.remove('active-tab');
+        });
+        document.getElementById(tabName).classList.add('active-tab');
+    }
+
+    function calcularIntereses() {
+        const capital = parseFloat(document.getElementById("principal").value);
+        const tasa = parseFloat(document.getElementById("tasa-interes").value) / 100;
+        const periodos = parseInt(document.getElementById("tiempo-interes").value);
+        const unidadTiempo = document.getElementById("unidad-tiempo").value;
+        const resultadoDiv = document.getElementById("resultado-intereses");
+        const ctxInteresSimple = document.getElementById("grafico-simple").getContext('2d');
+        const ctxInteresCompuesto = document.getElementById("grafico-compuesto").getContext('2d');
+        const ctxComparativo = document.getElementById("grafico-comparativo").getContext('2d');
+    
+        if (isNaN(capital) || isNaN(tasa) || isNaN(periodos)) {
+            resultadoDiv.innerHTML = "<strong>Error:</strong> Ingresa todos los valores correctamente.";
+            return;
+        }
+    
+        // Cálculo de Interés Simple
+        const interesesSimples = Array.from({ length: periodos }, (_, i) => capital + capital * tasa * (i + 1));
+        const interesSimple = interesesSimples[periodos - 1] - capital;
+        const valorFuturoSimple = capital + interesSimple;
+    
+        // Cálculo de Interés Compuesto
+        const valoresFuturosCompuesto = Array.from({ length: periodos }, (_, i) => capital * Math.pow(1 + tasa, i + 1));
+        const interesCompuesto = valoresFuturosCompuesto[periodos - 1] - capital;
+        const valorFuturoCompuesto = capital + interesCompuesto;
+    
+        // Mostrar resultados de Interés Simple y Compuesto
+        resultadoDiv.innerHTML = `
+            <h3>Resultados</h3>
+            <p><strong>Interés Simple:</strong> ${interesSimple.toFixed(2)}</p>
+            <p><strong>Valor Futuro (Interés Simple):</strong> ${valorFuturoSimple.toFixed(2)}</p>
+            <p><strong>Interés Compuesto:</strong> ${interesCompuesto.toFixed(2)}</p>
+            <p><strong>Valor Futuro (Interés Compuesto):</strong> ${valorFuturoCompuesto.toFixed(2)}</p>
+        `;
+    
+        // Crear gráficos
+        new Chart(ctxInteresSimple, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: periodos }, (_, i) => `Periodo ${i + 1}`),
+                datasets: [{
+                    label: 'Valor Futuro (Interés Simple)',
+                    data: interesesSimples,
+                    borderColor: 'rgba(255, 99, 132, 0.8)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: true
+                }]
+            }
+        });
+    
+        new Chart(ctxInteresCompuesto, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: periodos }, (_, i) => `Periodo ${i + 1}`),
+                datasets: [{
+                    label: 'Valor Futuro (Interés Compuesto)',
+                    data: valoresFuturosCompuesto,
+                    borderColor: 'rgba(54, 162, 235, 0.8)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: true
+                }]
+            }
+        });
+    
+        new Chart(ctxComparativo, {
+            type: 'bar',
+            data: {
+                labels: Array.from({ length: periodos }, (_, i) => `Periodo ${i + 1}`),
+                datasets: [
+                    {
+                        label: 'Interés Simple',
+                        data: interesesSimples,
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)'
+                    },
+                    {
+                        label: 'Interés Compuesto',
+                        data: valoresFuturosCompuesto,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                    }
+                ]
+            }
+        });
+    }
+    
+    let chartInstance; // Variable para almacenar la instancia del gráfico
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        // Event listener para detectar cambios en el tipo de amortización
+        document.getElementById("tipo-amortizacion").addEventListener("change", calcularAmortizaciones);
+        
+        // También activamos el cálculo inicial cuando la página se carga
+        calcularAmortizaciones();
+    });
+    
+    function calcularAmortizaciones() {
+        const capital = parseFloat(document.getElementById("capital").value); // $300
+        const tasa = parseFloat(document.getElementById("tasa-amortizacion").value) / 100 / 12; // 11% anual convertido a tasa mensual
+        const periodos = parseInt(document.getElementById("periodos-amortizacion").value); // 12 meses
+        const tipo = document.getElementById("tipo-amortizacion").value;
+        const resultadoDiv = document.getElementById("resultado-amortizaciones");
+        const tablaAmortizaciones = document.getElementById("tabla-amortizaciones");
+        const ctxAmortizaciones = document.getElementById("grafico-amortizaciones").getContext('2d');
+    
+        if (isNaN(capital) || isNaN(tasa) || isNaN(periodos)) {
+            resultadoDiv.innerHTML = "<strong>Error:</strong> Ingresa todos los valores correctamente.";
+            return;
+        }
+    
+        let pagos = [];
+        let saldo = capital;
+        let cuota;
+        let amortizacionCapital;
+        let interes;
+    
+        if (tipo === "americano") {
+            // Sistema Americano
+            cuota = capital * tasa;  // Cuota constante
+            for (let i = 1; i <= periodos; i++) {
+                interes = saldo * tasa;
+                let amortizacion = (i === periodos ? capital : 0); // Solo amortiza el capital al final
+                saldo -= amortizacion;
+                pagos.push({
+                    mes: i,
+                    capitalRestante: saldo.toFixed(2),
+                    interes: interes.toFixed(2),
+                    amortizacion: amortizacion.toFixed(2),
+                    cuota: cuota.toFixed(2)
+                });
+            }
+            pagos[periodos - 1].cuota = (cuota + capital).toFixed(2); // Última cuota incluye capital
+    
+        } else if (tipo === "frances") {
+            // Sistema Francés
+            cuota = (capital * tasa) / (1 - Math.pow(1 + tasa, -periodos)); // Cuota constante
+            for (let i = 1; i <= periodos; i++) {
+                interes = saldo * tasa;
+                let amortizacion = cuota - interes;
+                saldo -= amortizacion;
+                pagos.push({
+                    mes: i,
+                    capitalRestante: saldo.toFixed(2),
+                    interes: interes.toFixed(2),
+                    amortizacion: amortizacion.toFixed(2),
+                    cuota: cuota.toFixed(2)
+                });
+            }
+    
+        } else if (tipo === "aleman") {
+            // Sistema Alemán
+            amortizacionCapital = capital / periodos; // Amortización de capital constante
+            for (let i = 1; i <= periodos; i++) {
+                interes = saldo * tasa;
+                let cuotaTotal = amortizacionCapital + interes;
+                saldo -= amortizacionCapital;
+                pagos.push({
+                    mes: i,
+                    capitalRestante: saldo.toFixed(2),
+                    interes: interes.toFixed(2),
+                    amortizacion: amortizacionCapital.toFixed(2),
+                    cuota: cuotaTotal.toFixed(2)
+                });
+            }
+        }
+    
+        // Crear tabla
+        tablaAmortizaciones.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Mes</th>
+                    <th>Capital Restante</th>
+                    <th>Intereses</th>
+                    <th>Amortización de capital</th>
+                    <th>Cuota</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${pagos.map(pago => `
+                    <tr>
+                        <td>${pago.mes}</td>
+                        <td>$${pago.capitalRestante}</td>
+                        <td>$${pago.interes}</td>
+                        <td>$${pago.amortizacion}</td>
+                        <td>$${pago.cuota}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+    
+        // Si ya existe un gráfico, lo destruimos antes de crear uno nuevo
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+    
+        // Crear gráfico de barras
+        chartInstance = new Chart(ctxAmortizaciones, {
+            type: 'bar',
+            data: {
+                labels: pagos.map(pago => `Mes ${pago.mes}`),
+                datasets: [
+                    {
+                        label: 'Amortización de Capital',
+                        data: pagos.map(pago => parseFloat(pago.amortizacion)),
+                        backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Capital Restante',
+                        data: pagos.map(pago => parseFloat(pago.capitalRestante)),
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Monto ($)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Meses'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    }
+    
+    // Calculadora de Anualidades
+    function calcularAnualidades() {
+        const tipoAnualidad = document.getElementById("tipo-anualidad").value;
+        const calculo = document.getElementById("calculo").value;
+        const tasa = parseFloat(document.getElementById("tasa").value) / 100;
+        const periodos = parseInt(document.getElementById("periodos").value);
+        const valor = parseFloat(document.getElementById("valor").value);
+        const resultadoDiv = document.getElementById("resultado-anualidades")
+        if (isNaN(tasa) || isNaN(periodos) || isNaN(valor)) {
+            resultadoDiv.innerHTML = "<strong>Error:</strong> Ingresa todos los valores correctamente.";
+            return;
+        
+        let resultado;
+        if (calculo === "A") {
+            const factor = tipoAnualidad === "vencida" ? (1 - Math.pow(1 + tasa, -periodos)) / tasa
+                : (1 - Math.pow(1 + tasa, -periodos)) / tasa * (1 + tasa);
+            resultado = valor * factor;
+        } else if (calculo === "P") {
+            const factor = tipoAnualidad === "vencida" ? (1 - Math.pow(1 + tasa, -periodos)) / tasa
+                : (1 - Math.pow(1 + tasa, -periodos)) / tasa * (1 + tasa);
+            resultado = valor / factor;
+        } else if (calculo === "F") {
+            const factor = tipoAnualidad === "vencida" ? (Math.pow(1 + tasa, periodos) - 1) / tasa
+                : (Math.pow(1 + tasa, periodos) - 1) / tasa * (1 + tasa);
+            resultado = valor * factor;
+        
+        resultadoDiv.innerHTML = `<strong>Resultado:</strong> $${resultado.toFixed(2)}`;
+        }
+    }
+}
+
+function calcularDepreciacion() {
+    const costoInicial = parseFloat(document.getElementById("costo-inicial").value);
+    const valorResidual = parseFloat(document.getElementById("valor-residual").value);
+    const vidaUtil = parseInt(document.getElementById("vida-util").value);
+    const resultadoDiv = document.getElementById("resultado-depreciacion");
+    const tablaDepreciacion = document.getElementById("tabla-depreciacion");
+
+    if (isNaN(costoInicial) || isNaN(valorResidual) || isNaN(vidaUtil)) {
+        resultadoDiv.innerHTML = "<strong>Error:</strong> Ingresa todos los valores correctamente.";
+        return;
+    }
+
+    const depreciacionAnual = (costoInicial - valorResidual) / vidaUtil;
+    resultadoDiv.innerHTML = `<strong>Depreciación Anual:</strong> $${depreciacionAnual.toFixed(2)} por año.`;
+
+    let tableContent = "<table><tr><th>Año</th><th>Valor Inicial</th><th>Depreciación</th><th>Valor Final</th></tr>";
+    let valorActual = costoInicial;
+    
+    for (let i = 1; i <= vidaUtil; i++) {
+        const depreciacion = depreciacionAnual;
+        const valorFinal = valorActual - depreciacion;
+        tableContent += `<tr><td>${i}</td><td>$${valorActual.toFixed(2)}</td><td>$${depreciacion.toFixed(2)}</td><td>$${valorFinal.toFixed(2)}</td></tr>`;
+        valorActual = valorFinal; // Actualizamos el valor inicial para el siguiente año
+    }
+    tableContent += "</table>";
+    tablaDepreciacion.innerHTML = tableContent;
+}
+
+// Calculadora de Var, Tir, Payback
+function calcularFinanzas() {
+    // Obtener los datos ingresados
+    const egresoInicial = parseFloat(document.getElementById("egreso-inicial").value);
+    const cashflows = document.getElementById("cashflows").value.split(",").map(Number);
+    const tasaInteres = parseFloat(document.getElementById("tasa-interes-finanzas").value) / 100;
+
+    // Validar que los datos sean correctos
+    if (isNaN(egresoInicial) || cashflows.some(isNaN) || isNaN(tasaInteres)) {
+        alert("Por favor, ingresa valores válidos en todos los campos.");
+        return;
+    }
+
+    // Cálculo del VNA
+    const valorNetoActual = calcularVNA(egresoInicial, cashflows, tasaInteres);
+    document.getElementById("resultado-vna").innerText = `VNA (Valor Neto Actual): $${valorNetoActual.toFixed(2)}`;
+
+    // Cálculo del TIR
+    const tir = calcularTIR(egresoInicial, cashflows);
+    document.getElementById("resultado-tir").innerText = `TIR (Tasa Interna de Retorno): ${tir ? tir.toFixed(2) + "%" : "No se pudo calcular."}`;
+
+    // Cálculo del Payback
+    const payback = calcularPayback(egresoInicial, cashflows);
+    document.getElementById("resultado-payback").innerText = payback
+        ? `Payback: ${payback.toFixed(2)} períodos.`
+        : "No se alcanzó el punto de equilibrio.";
+}
+
+function calcularVNA(egresoInicial, cashflows, tasaInteres) {
+    let vnaResult = -egresoInicial; // El egreso inicial es negativo
+    cashflows.forEach((flujo, t) => {
+        vnaResult += flujo / Math.pow(1 + tasaInteres, t + 1); // Valor presente
+    });
+    return vnaResult;
+}
+
+function calcularTIR(egresoInicial, cashflows) {
+    const maxIter = 1000;
+    const tol = 1e-6;
+    let tir = 0.1; // Estimación inicial (10%)
+    let diff;
+
+    for (let iter = 0; iter < maxIter; iter++) {
+        let npv = -egresoInicial;
+        let dNpv = 0; // Derivada de NPV respecto a TIR
+
+        cashflows.forEach((flujo, t) => {
+            npv += flujo / Math.pow(1 + tir, t + 1);
+            dNpv -= (t + 1) * flujo / Math.pow(1 + tir, t + 2);
+        });
+
+        diff = npv / dNpv;
+        tir -= diff;
+
+        if (Math.abs(diff) < tol) {
+            return tir * 100; // Retornar en porcentaje
+        }
+    }
+    return null; // Si no converge, retorna null
+}
+
+function calcularPayback(egresoInicial, cashflows) {
+    let acumulado = -egresoInicial; // El egreso inicial es negativo
+    for (let t = 0; t < cashflows.length; t++) {
+        acumulado += cashflows[t];
+        if (acumulado >= 0) {
+            const anterior = acumulado - cashflows[t]; // Flujo acumulado anterior al cambio
+            return t + (Math.abs(anterior) / cashflows[t]); // Fracción del período
+        }
+    }
+    return null; // Si no se alcanza el punto de equilibrio
+}
+
+</script>
+
+
+
+<script>
+function calcularGradientes() {
+    const tipoGradiente = document.getElementById('tipo-gradiente').value;
+    const valorInicial = parseFloat(document.getElementById('valor-inicial').value);
+    const tasaCrecimiento = parseFloat(document.getElementById('tasa-crecimiento').value) / 100;
+    const tasaInteres = parseFloat(document.getElementById('tasa-interes').value) / 100;
+    const periodos = parseInt(document.getElementById('periodos-gradiente').value);
+
+    // Validaciones
+    if (isNaN(valorInicial) || valorInicial <= 0) {
+        alert("Por favor, ingrese un valor inicial mayor a 0.");
+        return;
+    }
+    if (isNaN(tasaCrecimiento) || tasaCrecimiento < 0) {
+        alert("Por favor, ingrese una tasa de crecimiento válida.");
+        return;
+    }
+    if (isNaN(tasaInteres) || tasaInteres < 0) {
+        alert("Por favor, ingrese una tasa de interés válida.");
+        return;
+    }
+    if (isNaN(periodos) || periodos <= 0) {
+        alert("Por favor, ingrese un número de períodos válido.");
+        return;
+    }
+
+    let resultados = [];
+    let valor = valorInicial;
+
+    if (tipoGradiente === 'aritmetico') {
+        for (let i = 1; i <= periodos; i++) {
+            valor += valorInicial * tasaCrecimiento;
+            resultados.push({ periodo: i, valor: valor.toFixed(2), tasa: (tasaCrecimiento * 100).toFixed(2) });
+        }
+    } else if (tipoGradiente === 'geometrico') {
+        for (let i = 1; i <= periodos; i++) {
+            valor *= (1 + tasaCrecimiento);
+            resultados.push({ periodo: i, valor: valor.toFixed(2), tasa: (tasaCrecimiento * 100).toFixed(2) });
+        }
+    }
+
+    mostrarResultados(resultados);
+}
+
+
+    function mostrarResultados(resultados) {
+        // Mostrar los resultados en una tabla
+        const tabla = document.getElementById('tabla-gradientes');
+        tabla.innerHTML = '';  // Limpiar la tabla antes de agregar nuevos datos
+
+        // Crear el encabezado de la tabla
+        const encabezado = document.createElement('thead');
+        encabezado.innerHTML = `
+            <tr>
+                <th>Periodo</th>
+                <th>Valor</th>
+                <th>Tasa</th>
+            </tr>
+        `;
+        tabla.appendChild(encabezado);
+
+        // Crear el cuerpo de la tabla
+        const cuerpo = document.createElement('tbody');
+        resultados.forEach(resultado => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td>${resultado.periodo}</td>
+                <td>${resultado.valor}</td>
+                <td>${resultado.tasa}%</td>
+            `;
+            cuerpo.appendChild(fila);
+        });
+        tabla.appendChild(cuerpo);
+
+        // Mostrar mensaje final
+        const resultadoDiv = document.getElementById('resultado-gradientes');
+        resultadoDiv.innerHTML = `Se calcularon los gradientes con éxito.`;
+    }
+</script>
+</body>
+</html>
