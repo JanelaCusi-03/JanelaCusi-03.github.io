@@ -516,36 +516,51 @@
     }
     
     // Calculadora de Anualidades
-    function calcularAnualidades() {
-        const tipoAnualidad = document.getElementById("tipo-anualidad").value;
-        const calculo = document.getElementById("calculo").value;
-        const tasa = parseFloat(document.getElementById("tasa").value) / 100;
-        const periodos = parseInt(document.getElementById("periodos").value);
-        const valor = parseFloat(document.getElementById("valor").value);
-        const resultadoDiv = document.getElementById("resultado-anualidades")
-        if (isNaN(tasa) || isNaN(periodos) || isNaN(valor)) {
-            resultadoDiv.innerHTML = "<strong>Error:</strong> Ingresa todos los valores correctamente.";
-            return;
-        
-        let resultado;
-        if (calculo === "A") {
-            const factor = tipoAnualidad === "vencida" ? (1 - Math.pow(1 + tasa, -periodos)) / tasa
-                : (1 - Math.pow(1 + tasa, -periodos)) / tasa * (1 + tasa);
-            resultado = valor * factor;
-        } else if (calculo === "P") {
-            const factor = tipoAnualidad === "vencida" ? (1 - Math.pow(1 + tasa, -periodos)) / tasa
-                : (1 - Math.pow(1 + tasa, -periodos)) / tasa * (1 + tasa);
-            resultado = valor / factor;
-        } else if (calculo === "F") {
-            const factor = tipoAnualidad === "vencida" ? (Math.pow(1 + tasa, periodos) - 1) / tasa
-                : (Math.pow(1 + tasa, periodos) - 1) / tasa * (1 + tasa);
-            resultado = valor * factor;
-        
-        resultadoDiv.innerHTML = `<strong>Resultado:</strong> $${resultado.toFixed(2)}`;
-        }
-    }
-}
+    // Calculadora de Anualidades
+function calcularAnualidades() {
+    const tipoAnualidad = document.getElementById("tipo-anualidad").value; // "vencida" o "anticipada"
+    const calculo = document.getElementById("calculo").value; // "A", "P" o "F"
+    const tasa = parseFloat(document.getElementById("tasa").value) / 100; // Convertir porcentaje a decimal
+    const periodos = parseInt(document.getElementById("periodos").value); // Número de períodos
+    const valor = parseFloat(document.getElementById("valor").value); // Valor de referencia
+    const resultadoDiv = document.getElementById("resultado-anualidades");
 
+    // Validar entradas
+    if (isNaN(tasa) || isNaN(periodos) || isNaN(valor)) {
+        resultadoDiv.innerHTML = "<strong>Error:</strong> Ingresa todos los valores correctamente.";
+        return;
+    }
+
+    let resultado;
+    let factor;
+
+    // Calculo de anualidades
+    if (calculo === "A") { // Calcular Anualidad
+        factor = tipoAnualidad === "vencida"
+            ? (1 - Math.pow(1 + tasa, -periodos)) / tasa
+            : ((1 - Math.pow(1 + tasa, -periodos)) / tasa) * (1 + tasa);
+        resultado = valor * factor;
+
+    } else if (calculo === "P") { // Calcular Valor Presente
+        factor = tipoAnualidad === "vencida"
+            ? (1 - Math.pow(1 + tasa, -periodos)) / tasa
+            : ((1 - Math.pow(1 + tasa, -periodos)) / tasa) * (1 + tasa);
+        resultado = valor / factor;
+
+    } else if (calculo === "F") { // Calcular Valor Futuro
+        factor = tipoAnualidad === "vencida"
+            ? (Math.pow(1 + tasa, periodos) - 1) / tasa
+            : ((Math.pow(1 + tasa, periodos) - 1) / tasa) * (1 + tasa);
+        resultado = valor * factor;
+
+    } else {
+        resultadoDiv.innerHTML = "<strong>Error:</strong> Tipo de cálculo no reconocido.";
+        return;
+    }
+
+    // Mostrar resultado
+    resultadoDiv.innerHTML = `<strong>Resultado:</strong> $${resultado.toFixed(2)}`;
+}
 function calcularDepreciacion() {
     const costoInicial = parseFloat(document.getElementById("costo-inicial").value);
     const valorResidual = parseFloat(document.getElementById("valor-residual").value);
